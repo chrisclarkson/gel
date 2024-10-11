@@ -6,10 +6,10 @@ Briefly, Expansion Hunter outputs a BAM file which contains the reads from a loc
 
 ## Input and output
 - Input:
--- JSON file with repeat component structures within the gene
+    - JSON file with repeat component structures within the gene
 File with absolute paths to the BAMlet files
 - Output:
--- TSV file, each row corresponds to a genome (e.g. BAMlet) and it records the number of reads including each repeat component described in the JSON file
+    - TSV file, each row corresponds to a genome (e.g. BAMlet) and it records the number of reads including each repeat component described in the JSON file
 
 
 Repeat Crawler accepts a list of repeat component structures (specified in a JSON input file) "crawls" along each read in an EH BAMlet file (small BAM) and documents the presence/absence and length of each component in the order that they are arranged in the input JSON file. NOTE the phrase "crawls" is used to convey that the program goes from each individual repeat component to the next as it makes it's way along a read.
