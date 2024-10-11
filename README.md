@@ -16,19 +16,19 @@ Repeat Crawler accepts a list of repeat component structures (specified in a JSO
 
 Subsequently, it tallies the number of found structures across all reads and finds the 2 most common and reports them as the first and second alleles which were then assigned to the EH allele lengths (matched by adding the total length of the repeat components and comparing to the EH repeat sizes).
 
-Installation
+## Installation
 The following versions have been used:
 
-python v3.7
-R v4.02
-Local installation using .venv
-Clone the repository
-Go to gel folder
-Run make. This will create a virtual environment called .venv
-Run make install. This will install all python libraries/dependencies included in requirements.txt
-Once all required libraries have been installed, activate the virtual environment:
-source .venv/bin/activate
-Usage
+* python v3.7
+
+# Local installation using .venv
+1. Clone the repository
+2. Go to gel folder
+3. Run make. This will create a virtual environment called .venv
+4. Run make install. This will install all python libraries/dependencies included in requirements.txt
+5. Once all required libraries have been installed, activate the virtual environment:
+```source .venv/bin/activate```
+# Usage
 To run Repeat Crawler on a list of EH BAMlet files:
 
 Exemplary run of repeat crawler script on a list of Expansion hunter BAMlet files:
