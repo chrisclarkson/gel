@@ -1,4 +1,4 @@
-`Repeat Crawler`
+# Repeat Crawler
 The structural variation of repeat elements is a relatively unexplored phenomenon within the field of Repeat expansion disorders (REDs). We present our analysis of short tandem repeats (STRs) using our novel software tool, “Repeat Crawler”. This software supplements output from [Expansion Hunter] (https://github.com/Illumina/ExpansionHunter) (EH) by taking the sequencing output and recording the presence and length of elements that both interrupt and border the disease repeat within the recorded alleles.
 
 `Context`
