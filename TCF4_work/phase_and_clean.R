@@ -1,4 +1,4 @@
-source('/re_cdep/neurology/Kristina/POPULATION/RC/new_genes/output/phase_and_clean_and_plot_tools.R')
+source('phase_and_clean_and_plot_tools.R')
 
 data=unique(data.frame(fread('TCF4_sample_0-3_eh_both_motifs.tsv',sep='\t'), stringsAsFactors=F))
 data_0=clean_data(data,4,c('first_second_gt','GAA1','GAG1','AAG','GAG2','CAG1','CAC','CAG2'))
