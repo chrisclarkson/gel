@@ -20,10 +20,10 @@ data_0_2=clean_data(data_0_2,4,c('first_second_gt'))
 data_0_2=format_v0_data(data_0_2)
 
 data_alleles_imputed=merge_and_phase(data_phased,data_0_2,c('GT1','GT2','CAG_sum_a1','CAG_sum_a2','EH_CAG_A1','EH_CAG_A2'),'TCF4_phased.txt')
-nrow(data_alleles_imputed)
+# nrow(data_alleles_imputed)
 
 data_alleles_imputed=data_alleles_imputed[!(data_alleles_imputed$GT1_imputed=='imputed' & data_alleles_imputed$GT2_imputed=='imputed'),]
-nrow(data_alleles_imputed)
+# nrow(data_alleles_imputed)
 
 # g_tcf4=melt_columns_and_plot_structure_across_ancestries_and_undone(
 # data.frame(data_alleles_imputed, stringsAsFactors=F),
@@ -34,32 +34,18 @@ nrow(data_alleles_imputed)
 # )
 
 
-plot_list=plot_pairs2(data_phased,
-list(c('GAG_sum_a1','GAG_sum_a2')),
-list(c('EH_GAG_A1','EH_GAG_A2')),
-list(c('CAG_sum_a1','CAG_sum_a2')),
-list(c('EH_CAG_A1','EH_CAG_A2')),
-'TCF4')
-
-pdf('tcf4_pairs.pdf')
-do.call('grid.arrange',c(plot_list))
-dev.off()
-
-g=plot_imputed_distribution(data_alleles_imputed,'TCF4')
-
 revc=function(x){
-opposite_strand=function(x){
-x=gsub('A','t',x);x=gsub('G','c',x);x=gsub('T','a',x);x=gsub('C','g',x)
-x=toupper(x)
-return(x)
-}
-reverse_string=function(x){
-return(sapply(lapply(strsplit(x, NULL), rev), paste, collapse=""))
-}
-
-x=opposite_strand(x)
-x=reverse_string(x)
-return(x)
+    opposite_strand=function(x){
+        x=gsub('A','t',x);x=gsub('G','c',x);x=gsub('T','a',x);x=gsub('C','g',x)
+        x=toupper(x)
+        return(x)
+    }
+    reverse_string=function(x){
+        return(sapply(lapply(strsplit(x, NULL), rev), paste, collapse=""))
+    }
+    x=opposite_strand(x)
+    x=reverse_string(x)
+    return(x)
 }
 
 revc_cols=revc(c('GAA1','GAG1','AAG','AGG2'))
@@ -73,9 +59,15 @@ revc_data$new_structure_a1=''
 revc_data$new_structure_a2=''
 
 for( r in revc_cols){
-revc_data$new_structure_a1=paste0(revc_data$new_structure_a1,r,'x',as.integer(revc_data[,paste0(r,'_A1')]),'|')
-revc_data$new_structure_a2=paste0(revc_data$new_structure_a2,r,'x',as.integer(revc_data[,paste0(r,'_A2')]),'|')
+    revc_data$new_structure_a1=paste0(revc_data$new_structure_a1,r,'x',as.integer(revc_data[,paste0(r,'_A1')]),'|')
+    revc_data$new_structure_a2=paste0(revc_data$new_structure_a2,r,'x',as.integer(revc_data[,paste0(r,'_A2')]),'|')
 }
 
 revc_data$new_structure_a1[grep(pattern='CAC',data_alleles_imputed$GT1)]=paste(revc_data$new_structure_a1[grep(pattern='CAC',data_alleles_imputed$GT1)],'GTG interruption present')
 revc_data$new_structure_a2[grep(pattern='CAC',data_alleles_imputed$GT2)]=paste(revc_data$new_structure_a2[grep(pattern='CAC',data_alleles_imputed$GT2)],'GTG interruption present')
+print(head(revc_data))
+revc_data=revc_data[,c('bam_file','new_structure_a1','new_structure_a1','Q1_1','Q1_2')]
+colnames(revc_data)=c('bam_file','new_structure_a1','new_structure_a1','EH_CAG_A1','EH_CAG_A2')
+write.table(revc_data,'alleles_imputed_and_formatted.tsv',sep='\t',row.names=F,quote=F)
+
+
