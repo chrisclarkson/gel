@@ -1,5 +1,5 @@
 # Repeat Crawler
-The structural variation of repeat elements is a relatively unexplored phenomenon within the field of Repeat expansion disorders (REDs). We present our analysis of short tandem repeats (STRs) using our novel software tool, “Repeat Crawler”. This software supplements output from [Expansion Hunter] (https://github.com/Illumina/ExpansionHunter) (EH) by taking the sequencing output and recording the presence and length of elements that both interrupt and border the disease repeat within the recorded alleles.
+The variation in constitution and structure of repeat expansion loci (e.g. RFC1: AAAAG -> AAGGG. Or having intermittent CAA interruptions in a CAG track) is not readily accessible via classic bioinformatics tools like [ExpansionHunter](https://github.com/Illumina/ExpansionHunter) (EH). “Repeat Crawler” is a tool that supplements the output of EH by annotating the presence and length of elements that both interrupt and border the disease repeat within the recorded alleles.
 
 ## Context
 Briefly, Expansion Hunter outputs a BAM file which contains the reads from a locus of interest. The reads are quality checked and annotated according to the sections of a repetitive region that each read covers. The various components of the repetitive region are marked by 0:flanking region, 1:first component and so on. Hence, this can be taken advantage when further analysing reads.
@@ -24,10 +24,7 @@ The following versions have been used:
 # Local installation using .venv
 1. Clone the repository
 2. Go to gel folder
-3. Run make. This will create a virtual environment called .venv
-4. Run make install. This will install all python libraries/dependencies included in requirements.txt
-5. Once all required libraries have been installed, activate the virtual environment:
-```source .venv/bin/activate```
+3. pip install -r requirements.txt
 # Usage
 To run Repeat Crawler on a list of EH BAMlet files:
 
@@ -35,10 +32,47 @@ Exemplary run of repeat crawler script on a list of Expansion hunter BAMlet file
 
 ```
 python RC_latest.py 
-    --bam_files list_of_expansion_hunter_bamlet.txt \
+    --bam_files list_of_expansion_hunter_bamlets.txt \
     --output THAP11_RC.tsv \
-    --span 0-2 \
     --gene THAP11 \
-    --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 --json THAP11_structure.json \
-    --must_contain CAG1
+    --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
+    --json THAP11_structure.json 
 ```
+The above run is done on an exemplary list of EH output bamlet files (`cat list_of_expansion_hunter_bamlets.txt` to see the paths)- the reads are annotated according to the prespecified structure contained in `THAP11_structure.json`. 
+
+# Specifying Structure
+In order to study the reads, Repeat crawler will study reads according to what is inside the `--json structure.json` input file. The syntax required to design a structure is as follows:
+
+```
+{
+"anchor_sequence":["(GGCAG){1,}"],
+"CAG1":["(CAG){1,}"],
+"CAA1":["(CAA){1,}"],
+"CAG2":["(CAG){1,}"],
+"CAA2":["(CAA){1,}"],
+"CAG3":["(CAG){1,}"],
+"CAA3":["(CAA){1,}"],
+"CAG4":["(CAG){1,}"],
+"CAA4":["(CAA){1,}"],
+"CAG5":["(CAG){1,}"],
+"CAA5":["(CAA){1,}"],
+"CAG6":["(CAG){1,}"],
+"CAA6":["(CAA){1,}"],
+"CAG7":["(CAG){1,}"]
+}
+```
+Each line in the list specifies a name for a repeat element `CAG1` and the regular expression needed to search for this element in a read e.g. `["(CAG){1,}"]`- to set a number of CAGs that need to be found e.g. 5 or more- you can change it to `["(CAG){5,}"]`. In the output this will be reported in a table as e.g. `CAG1=5|CAA1=1|CAG2=4....` . The repeat elements will only be reported in the order that that they are input.
+
+# Test the input repeat structure
+To see what annotation a bamlet is assigned- you can run RC as above only change the parameter `--bam_files ...` from plural to singular -> `--bam_file input.bam`. This will output a table as such:
+
+```
+CAG1  CAA1  CAG2....  nreads
+5     1     4   ....  6
+3     1     2   ....  3
+1     2     1   ....  1
+....
+```
+In the above table the allele structures are ranked by the number of reads supporting a given structure and the top two are taken as the alleles that will later be assigned to the EH repeat sizes.
+
+
