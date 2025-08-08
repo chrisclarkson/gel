@@ -75,4 +75,5 @@ CAG1  CAA1  CAG2....  nreads
 ```
 In the above table the allele structures are ranked by the number of reads supporting a given structure and the top two are taken as the alleles that will later be assigned to the EH repeat sizes.
 
-
+# Structure to an EH repeat size
+Having performed the initial annotation- one then needs to bind EH repeat sizes to the RC output and subsequently phase them.
