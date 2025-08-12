@@ -7,7 +7,7 @@ Briefly, Expansion Hunter outputs a BAM file which contains the reads from a loc
 ## Input and output
 - Input:
     - JSON file with repeat component structures within the gene
-File with absolute paths to the BAMlet files
+    - File with absolute paths to the BAMlet files/single bamlet file
 - Output:
     - TSV file, each row corresponds to a genome (e.g. BAMlet) and it records the number of reads including each repeat component described in the JSON file
 
@@ -31,7 +31,7 @@ To run Repeat Crawler on a list of EH BAMlet files:
 Exemplary run of repeat crawler script on a list of Expansion hunter BAMlet files:
 
 ```
-python RC_latest.py 
+python RC_latest.py \
     --bam_files list_of_expansion_hunter_bamlets.txt \
     --output THAP11_RC.tsv \
     --gene THAP11 \
@@ -67,13 +67,72 @@ Each line in the list specifies a name for a repeat element `CAG1` and the regul
 To see what annotation a bamlet is assigned- you can run RC as above only change the parameter `--bam_files ...` from plural to singular -> `--bam_file input.bam`. This will output a table as such:
 
 ```
-CAG1  CAA1  CAG2....  nreads
-5     1     4   ....  6
-3     1     2   ....  3
-1     2     1   ....  1
+CAG1  CAA1  CAG2 ....  nreads
+5     1     4    ....  6
+3     1     2    ....  3
+1     2     1    ....  1
 ....
 ```
 In the above table the allele structures are ranked by the number of reads supporting a given structure and the top two are taken as the alleles that will later be assigned to the EH repeat sizes.
 
-# Structure to an EH repeat size
-Having performed the initial annotation- one then needs to bind EH repeat sizes to the RC output and subsequently phase them.
+# Assigning tructure to an EH repeat size
+Having performed the initial annotation- one then needs to bind EH repeat sizes to the RC output and subsequently phase them. 
+## Binding EH repeats
+The binding of repeat sizes is initially done using `annotate_EH_lengths.py`- using the above exemplary output:
+
+```
+python annotate_EH_lengths.py --input THAP11_RC.tsv --gene THAP11 --motifs CAG --output THAP11_RC_eh.tsv
+```
+
+## Phasing of repeat structures when compared to EH repeat sizes
+
+This step is done in R using the tools available in `phase_and_clean_and_plot_tools.R`:
+
+```
+R
+source('phase_and_clean_and_plot_tools.R')
+data=read.table('THAP11_RC_eh.tsv',sep='\t',header=T,stringsAsFactors=F)
+data_phased$bam_file=basename(gsub('_THAP11.vcf','',data_phased$bam_file))
+data=clean_data(data,4,c('first_second_gt','CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7'))
+data_phased=phase(data,list(c('CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7')),c('EH_CAG'),multiples=NULL,'CAG')
+```
+Now you can start comparing the RC output to that of EH using the columns `CAG_sum_a1`,`CAG_sum_a2`,`EH_CAG_A1` and `EH_CAG_A2` to see how well RC annotated your EH data.
+
+## Phasing in the case of repeats where the repeat can be expanded beyond 150 bp threshold
+In some cases, it may be necessary to assign repeat structure without knowing the exact size of a repeat (when a repeat is expanded to a size that exceeds the 150bp limit of short read sequencing, EH estimates the size). To do this we employ a strategy that uses process of elimination to assign the found read structures to the 2 EH repeat alleles correctly.
+
+![plot](./RC_phasing.png)
+
+Briefly, we assume that there will always be a shorter allele that is phaseable to allow us to assign a repeat structure to it and hence- by exclusion assign the remaining unassigned repeat structure to the expanded allele.
+
+Here is a typical workflow for a repeat where alleles can expand beyond the 150bp (NOTE: this is not a known repeat expansion locus- rather an imaginary one- to provide example):
+
+```
+python RC_latest.py \
+    --bam_files list_of_expansion_hunter_bamlets.txt \
+    --output THAP11_RC_0-2.tsv \
+    --gene THAP11 \
+    --span 0-2 \
+    --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
+    --json imaginary_gene.json
+
+python annotate_EH_lengths.py --input THAP11_RC.tsv --gene THAP11 --motifs CAG --output THAP11_RC_0-2_eh.tsv
+
+python RC_latest.py \
+    --bam_files list_of_expansion_hunter_bamlets.txt \
+    --output THAP11_RC_0-1.tsv \
+    --gene THAP11 \
+    --span 0-1 \
+    --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
+    --json imaginary_gene.json 
+
+R
+source('phase_and_clean_and_plot_tools.R')
+data=read.table('THAP11_RC_0-2_eh.tsv',sep='\t',header=T,stringsAsFactors=F)
+data_phased$bam_file=basename(gsub('_THAP11.vcf','',data_phased$bam_file))
+data=clean_data(data,4,c('first_second_gt','CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7'))
+data_phased=phase(data,list(c('CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7')),c('EH_CAG'),multiples=NULL,'CAG')
+data_0_1=read.table('THAP11_RC_0-1.tsv',sep='\t',header=T,stringsAsFactors=F)
+data_0_1=format_v0_data(data_0_1)
+phased_data=merge_and_phase(data_phased,data_0_1,c('GT1','GT2','CAG_sum_a1','CAG_sum_a2','EH_CAG_A1','EH_CAG_A2'),'phased_new.txt')
+```
