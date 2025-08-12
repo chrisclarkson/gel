@@ -110,29 +110,29 @@ Here is a typical workflow for a repeat where alleles can expand beyond the 150b
 ```
 python RC_latest.py \
     --bam_files list_of_expansion_hunter_bamlets.txt \
-    --output THAP11_RC_0-2.tsv \
-    --gene THAP11 \
+    --output imaginary_gene_RC_0-2.tsv \
+    --gene imaginary_gene \
     --span 0-2 \
     --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
     --json imaginary_gene.json
 
-python annotate_EH_lengths.py --input THAP11_RC.tsv --gene THAP11 --motifs CAG --output THAP11_RC_0-2_eh.tsv
+python annotate_EH_lengths.py --input imaginary_gene_RC.tsv --gene imaginary_gene --motifs CAG --output imaginary_gene_RC_0-2_eh.tsv
 
 python RC_latest.py \
     --bam_files list_of_expansion_hunter_bamlets.txt \
-    --output THAP11_RC_0-1.tsv \
-    --gene THAP11 \
+    --output imaginary_gene_RC_0-1.tsv \
+    --gene imaginary_gene \
     --span 0-1 \
     --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
     --json imaginary_gene.json 
 
 R
 source('phase_and_clean_and_plot_tools.R')
-data=read.table('THAP11_RC_0-2_eh.tsv',sep='\t',header=T,stringsAsFactors=F)
-data_phased$bam_file=basename(gsub('_THAP11.vcf','',data_phased$bam_file))
+data=read.table('imaginary_gene_RC_0-2_eh.tsv',sep='\t',header=T,stringsAsFactors=F)
+data_phased$bam_file=basename(gsub('_imaginary_gene.vcf','',data_phased$bam_file))
 data=clean_data(data,4,c('first_second_gt','CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7'))
 data_phased=phase(data,list(c('CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7')),c('EH_CAG'),multiples=NULL,'CAG')
-data_0_1=read.table('THAP11_RC_0-1.tsv',sep='\t',header=T,stringsAsFactors=F)
+data_0_1=read.table('imaginary_gene_RC_0-1.tsv',sep='\t',header=T,stringsAsFactors=F)
 data_0_1=format_v0_data(data_0_1)
 phased_data=merge_and_phase(data_phased,data_0_1,c('GT1','GT2','CAG_sum_a1','CAG_sum_a2','EH_CAG_A1','EH_CAG_A2'),'phased_new.txt')
 ```
