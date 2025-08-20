@@ -97,6 +97,11 @@ data=clean_data(data,4,c('first_second_gt','CAG1','CAA1','CAG2','CAA2','CAG3','C
 data_phased=phase(data,list(c('CAG1','CAA1','CAG2','CAA2','CAG3','CAA3','CAG4','CAA4','CAG5','CAA5','CAG6','CAA6','CAG7')),c('EH_CAG'),multiples=NULL,'CAG')
 ```
 Now you can start comparing the RC output to that of EH using the columns `CAG_sum_a1`,`CAG_sum_a2`,`EH_CAG_A1` and `EH_CAG_A2` to see how well RC annotated your EH data.
+One way of doing this is to plot them against one another - using `plot_eh_vs_rc()`:
+```
+g=plot_eh_vs_rc(data_phased,c('CAG_sum_a1','CAG_sum_a2'),c('EH_CAG_A1','EH_CAG_A2'),c('GT1','GT2'))
+```
+![plot](./RC_vs_EH.png)
 
 ## Phasing in the case of repeats where the repeat can be expanded beyond 150 bp threshold
 In some cases, it may be necessary to assign repeat structure without knowing the exact size of a repeat (when a repeat is expanded to a size that exceeds the 150bp limit of short read sequencing, EH estimates the size). To do this we employ a strategy that uses process of elimination to assign the found read structures to the 2 EH repeat alleles correctly.
