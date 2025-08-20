@@ -103,7 +103,7 @@ g=plot_eh_vs_rc(data_phased,c('CAG_sum_a1','CAG_sum_a2'),c('EH_CAG_A1','EH_CAG_A
 ```
 ![plot](./RC_vs_EH.png)
 The above plot is from a different analysis- but gives an example of how to compare EH vs RC output across repeat structure.
-Each repeat structure in the legend has the percentage of alleles where EH and RC agree- allowing you to investigate repeat structures that are likely incorrect.
+Each repeat structure in the legend has the percentage of alleles where EH and RC agree- allowing you to investigate repeat structure categories that have disproportionate rates of disagreement with EH and hence are likely an artefact of the analysis.
 
 ## Phasing in the case of repeats where the repeat can be expanded beyond 150 bp threshold
 In some cases, it may be necessary to assign repeat structure without knowing the exact size of a repeat (when a repeat is expanded to a size that exceeds the 150bp limit of short read sequencing, EH estimates the size). To do this we employ a strategy that uses process of elimination to assign the found read structures to the 2 EH repeat alleles correctly.
@@ -115,6 +115,7 @@ Briefly, we assume that there will always be a shorter allele that is phaseable 
 Here is a typical workflow for a repeat where alleles can expand beyond the 150bp (NOTE: this is not a known repeat expansion locus- rather an imaginary one- to provide example):
 
 ```
+# run at first only analysing reads that span from 0-2 i.e. reads that are not expanded beyond 150bp
 python RC_latest.py \
     --bam_files list_of_expansion_hunter_bamlets.txt \
     --output imaginary_gene_RC_0-2.tsv \
@@ -123,8 +124,10 @@ python RC_latest.py \
     --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
     --json imaginary_gene.json
 
+# annotate above file with output from EH
 python annotate_EH_lengths.py --input imaginary_gene_RC.tsv --gene imaginary_gene --motifs CAG --output imaginary_gene_RC_0-2_eh.tsv
 
+# run again allowing for reads that do not span the full repeat but only the start in order to find the structure of the start of the repeat
 python RC_latest.py \
     --bam_files list_of_expansion_hunter_bamlets.txt \
     --output imaginary_gene_RC_0-1.tsv \
@@ -133,6 +136,7 @@ python RC_latest.py \
     --count CAG1 CAA1 CAG2 CAA2 CAG3 CAA3 CAG4 CAA4 CAG5 CAA5 CAG6 CAA6 CAG7 \
     --json imaginary_gene.json 
 
+# use R to merge these outputs and phase and impute the structure of expanded alleles
 R
 source('phase_and_clean_and_plot_tools.R')
 data=read.table('imaginary_gene_RC_0-2_eh.tsv',sep='\t',header=T,stringsAsFactors=F)
