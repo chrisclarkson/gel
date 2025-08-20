@@ -102,6 +102,8 @@ One way of doing this is to plot them against one another - using `plot_eh_vs_rc
 g=plot_eh_vs_rc(data_phased,c('CAG_sum_a1','CAG_sum_a2'),c('EH_CAG_A1','EH_CAG_A2'),c('GT1','GT2'))
 ```
 ![plot](./RC_vs_EH.png)
+The above plot is from a different analysis- but gives an example of how to compare EH vs RC output across repeat structure.
+Each repeat structure in the legend has the percentage of alleles where EH and RC agree- allowing you to investigate repeat structures that are likely incorrect.
 
 ## Phasing in the case of repeats where the repeat can be expanded beyond 150 bp threshold
 In some cases, it may be necessary to assign repeat structure without knowing the exact size of a repeat (when a repeat is expanded to a size that exceeds the 150bp limit of short read sequencing, EH estimates the size). To do this we employ a strategy that uses process of elimination to assign the found read structures to the 2 EH repeat alleles correctly.

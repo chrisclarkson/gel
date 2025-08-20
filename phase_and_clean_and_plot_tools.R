@@ -1313,6 +1313,35 @@ plot_imputed_distibrution=function(data,name){
     return(g)
 }
 
+plot_eh_vs_rc=function(data,rc_cols,eh_cols,struct_cols,gene=''){
+  data=data.frame(data,stringsAsFactors=F)
+
+  data_plot=data.frame()# 
+  for(i in 1:length(rc_cols)){
+    dt=data[,c(rc_cols[i],eh_cols[i],struct_cols[i])]
+    colnames(dt)=c('RC','EH','structure')
+    data_plot=rbind(data_plot,dt)
+  }
+
+  data_plot$structure_annotated=data_plot$structure
+  for(s in unique(data_plot$structure)){
+    data_plot_sub=data_plot[data_plot$structure_annotated==s,]
+    data_plot$structure_annotated[data_plot$structure_annotated==s]=paste(s,round(sum(data_plot_sub$EH==data_plot_sub$RC,na.rm=T)/nrow(data_plot_sub),1))
+  }
+  data_plot=data_plot %>% group_by(RC,EH,structure_annotated) %>%
+    summarise(n = n())
+  print(data_plot)
+
+  g=ggplot(data_plot, aes(x = RC, y = EH,size=log10(n),col=structure_annotated)) + 
+    geom_point() + 
+    geom_abline(slope = 1, intercept = 0, color = "black") + 
+    facet_wrap(~structure_annotated)
+  png(paste0('RC_vs_EH_diagonal_',gene,'.png'),height=1000,width=1000)
+  print(g)
+  dev.off()
+  return(g)
+}
+
 
 gene_diversity=function(data_new){
     n=length(unique(data_new$structure))
