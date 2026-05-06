@@ -6,7 +6,6 @@
 ## running expansion hunter on GEL:
 A generic run of ExpansionHunter on GEL will be done using this bash script (for a given `$gene`, on a set of genomes contatined in a job array file):
 ```
-
 for gene in gene1 gene2 gene3
 do
 bsub -q short -P re_gecip_neurology -J "Array[1-20262:100]" -R rusage[mem=48000] -M 48000 -n 3 \
